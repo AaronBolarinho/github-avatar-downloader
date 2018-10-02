@@ -1,5 +1,9 @@
+/*
 var request = require('request');
 var secret = require('./secret.js');
+var fs = require('fs');
+
+var myArrayPictures = []
 
 function getRepoContributors(repoOwner, repoName, cb) {
   var options = {
@@ -11,18 +15,113 @@ function getRepoContributors(repoOwner, repoName, cb) {
   };
 
   request(options, function(err, res, body) {
-    cb(err, body);
+    if (!err && res.statusCode = 200) {                                   // Note 2
+         var array = JSON.parse(body);
+         cb(err, body);
+       } else {
+        console.log(err);
+       }
+  });
+
+
+getRepoContributors("jquery", "jquery", function(err, body) {
+  // console.log("Errors:", err);
+  // console.log("Result:", result);
+  for (var i = 0; i < myArrayPictures.length; i++) {
+    myArrayPictures.push(array[i].avatar_url);
+  }
+  console.log(myArrayPictures);
+
+
+
+
+request.get(myArrayPictures[i])               // Note 1
+       .on('error', function (err) {                                   // Note 2
+         throw err;
+       })
+       .on('response', function (response) {
+         console.log('Downloading image...');                           // Note 3
+         console.log('Response Status Code: ', response.statusCode);
+         console.log('Response Message: ', response.statusMessage)
+         console.log('Response Content Type: ', response.headers['content-type'])
+       })
+       .pipe(fs.createWriteStream('./avatars/blah.jpeg'));
+
+};
+});
+
+console.log('Welcome to the GitHub Avatar Downloader!');
+*/
+
+
+var request = require('request');
+var secret = require('./secret.js');
+var fs = require('fs');
+
+var myArrayPictures = [];
+var myLoginNames = [];
+
+function getRepoContributors(repoOwner, repoName, cb) {
+  var options = {
+    url: "https://api.github.com/repos/" + repoOwner + "/" + repoName + "/contributors",
+    headers: {
+      'User-Agent': 'request',
+      'Authorization': secret.GITHUB_TOKEN
+    }
+  };
+
+  request(options, function(err, res, body) {
     var array = JSON.parse(body);
     for (var i = 0; i < array.length; i++) {
-      console.log(array[i].avatar_url);
+      myArrayPictures.push(array[i].avatar_url);
+      myLoginNames.push(array[i].login);
+      // console.log(myArrayPictures);
+      // // console.log("question", myArrayPictures);
     }
-    // console.log(array);
+    cb(err, body);
+    console.log(myLoginNames);
   });
 }
 
 getRepoContributors("jquery", "jquery", function(err, result) {
   // console.log("Errors:", err);
   // console.log("Result:", result);
+  console.log(myArrayPictures);
+
+  for (var i = 0; i < myArrayPictures.length; i++) {
+
+request.get(myArrayPictures[i])               // Note 1
+       .on('error', function (err) {                                   // Note 2
+         throw err;
+       })
+       .on('response', function (response) {
+         console.log('Downloading image...');                           // Note 3
+         console.log('Response Status Code: ', response.statusCode);
+         console.log('Response Message: ', response.statusMessage)
+         console.log('Response Content Type: ', response.headers['content-type'])
+       })
+       .pipe(fs.createWriteStream('./avatars' + "/" + myLoginNames[i] + '.jpeg'));
+
+};
 });
 
 console.log('Welcome to the GitHub Avatar Downloader!');
+
+
+
+/*
+request.get(myArrayPictures[i])               // Note 1
+       .on('error', function (err) {                                   // Note 2
+         throw err;
+       })
+       .on('response', function (response) {
+         console.log('Downloading image...');                           // Note 3
+         console.log('Response Status Code: ', response.statusCode);
+         console.log('Response Message: ', response.statusMessage)
+         console.log('Response Content Type: ', response.headers['content-type'])
+       })
+       .pipe(fs.createWriteStream('./avatars/blah.jpeg'));
+
+};
+});
+*/
